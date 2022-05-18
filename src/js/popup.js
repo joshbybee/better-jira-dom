@@ -45,7 +45,7 @@ class Popup {
       console.log('enabled storage', storage);
 
       document.getElementById('enabled').checked = !! value;
-    });
+    });    
 
     this.Storage.get('standup', (storage) => {
       let value = storage.standup;
@@ -58,6 +58,45 @@ class Popup {
       console.log('standup storage', storage);
 
       document.getElementById('standup').checked = !! value;
+    });
+
+    this.Storage.get('ready2migrate', (storage) => {
+      let value = storage.ready2migrate;
+      if(value === undefined) {
+        value = this.defaults.ready2migrate;
+        this.Storage.set({ready2migrate: value});
+      }
+
+      this.data.ready2migrate = value;
+      console.log('ready2migrate storage', storage);
+
+      document.getElementById('ready2migrate').checked = !! value;
+    });
+
+    this.Storage.get('verifyInProd', (storage) => {
+      let value = storage.verifyInProd;
+      if(value === undefined) {
+        value = this.defaults.verifyInProd;
+        this.Storage.set({verifyInProd: value});
+      }
+
+      this.data.verifyInProd = value;
+      console.log('verifyInProd storage', storage);
+
+      document.getElementById('verifyInProd').checked = !! value;
+    });
+
+    this.Storage.get('done', (storage) => {
+      let value = storage.done;
+      if(value === undefined) {
+        value = this.defaults.done;
+        this.Storage.set({done: value});
+      }
+
+      this.data.done = value;
+      console.log('done storage', storage);
+
+      document.getElementById('done').checked = !! value;
     });
   }
 
@@ -83,6 +122,30 @@ class Popup {
       this.save();
     });
 
+    //-- Toggle Column (as a 1-click event)
+    let ready2migrate = document.getElementById('ready2migrate');
+    ready2migrate.addEventListener('click', (event) => {
+      console.log('you clicked ready2migrate!', ready2migrate.checked, event);
+      this.data.ready2migrate = ready2migrate.checked;
+      this.save();
+    });
+
+    //-- Toggle Column (as a 1-click event)
+    let verifyInProd = document.getElementById('verifyInProd');
+    verifyInProd.addEventListener('click', (event) => {
+      console.log('you clicked verifyInProd!', verifyInProd.checked, event);
+      this.data.verifyInProd = verifyInProd.checked;
+      this.save();
+    });
+
+    //-- Toggle Column (as a 1-click event)
+    let done = document.getElementById('done');
+    done.addEventListener('click', (event) => {
+      console.log('you clicked done!', done.checked, event);
+      this.data.done = done.checked;
+      this.save();
+    });
+
     document.getElementById('better-jira').addEventListener('submit', (event) => {
       event.preventDefault();
       console.log('form submission information', arguments);
@@ -94,8 +157,14 @@ class Popup {
 
   save() {
     this.Storage.set({enabled: this.data.enabled}, () => {
-      this.Storage.set({columnWidth: this.data.columnWidth}, () => {
-        this.Storage.set({standup: this.data.standup}, this.refresh.bind(this));
+      this.Storage.set({enabled: this.data.ready2migrate}, () => {
+        this.Storage.set({enabled: this.data.verifyInProd}, () => {
+          this.Storage.set({enabled: this.data.done}, () => {
+            this.Storage.set({columnWidth: this.data.columnWidth}, () => {
+              this.Storage.set({standup: this.data.standup}, this.refresh.bind(this));
+            });
+          });
+        });
       });
     });
   }
@@ -110,6 +179,9 @@ class Popup {
           `detail: {`,
             `columnWidth: ${this.data.columnWidth},`,
             `enabled: ${this.data.enabled},`,
+            `enabled: ${this.data.ready2migrate},`,
+            `enabled: ${this.data.verifyInProd},`,
+            `enabled: ${this.data.done},`,
             `standup: ${this.data.standup},`,
           `}`,
         `});`,
